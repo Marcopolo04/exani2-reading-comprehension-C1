@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CenevalMaster · EXANI II · Reading Comprehension (25 items)</title>
+  <style>
+    :root{
+      --bg:#0b1021; --card:#12183a; --ink:#eef2ff; --muted:#9aa3b2;
+      --accent:#5dd39e; --accent2:#a78bfa; --danger:#ff6b6b; --ok:#22c55e;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,'Noto Sans',sans-serif;background:var(--bg);color:var(--ink)}
+    main{max-width:1024px;margin:0 auto;padding:1.2rem}
+    .site-header,.site-footer{background:#0a0f26;border-bottom:1px solid #1f2a55}
+    .site-header{padding:1rem 1.2rem}
+    .site-footer{padding:1rem 1.2rem;color:var(--muted);text-align:center}
+    .brand{display:flex;align-items:center;gap:.8rem}
+    .card{background:var(--card);border:1px solid #1f2a55;border-radius:12px;padding:1rem;margin-block:1rem;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    label span{display:block;margin-bottom:.25rem;color:var(--muted)}
+    input[type="text"],input[type="email"],input[type="number"]{width:100%;padding:.75rem;border-radius:8px;border:1px solid #2a356b;background:#0f1540;color:var(--ink)}
+    button{appearance:none;border:none;border-radius:10px;padding:.75rem 1rem;font-weight:600;cursor:pointer}
+    button.primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#0b1021}
+    button.secondary{background:#1a2250;color:var(--ink)}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .hidden{display:none}
+    .timer{font-weight:700}
+    .progress{height:10px;background:#1f2a55;border-radius:9999px;overflow:hidden}
+    #progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .passage{white-space:pre-wrap;line-height:1.55;background:#0f1540;border:1px solid #2a356b;border-radius:10px;padding:1rem}
+    .q-head{display:flex;justify-content:space-between;align-items:center;margin:.2rem 0 .6rem 0}
+    .q-text{font-size:1.05rem;margin:.25rem 0 .5rem 0}
+    .options{display:grid;gap:.5rem;margin-top:.4rem}
+    .option{display:flex;gap:.6rem;background:#0f1540;border:1px solid #2a356b;border-radius:10px;padding:.6rem;cursor:pointer}
+    .option input{margin-top:.25rem}
+    .feedback{margin-top:.5rem;padding:.6rem;border-radius:8px;border:1px solid transparent;background:#12183a;color:var(--muted)}
+    .feedback.ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.45);color:#a7f3d0}
+    .feedback.err{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.45);color:#fecaca}
+    .badge{display:inline-block;padding:.15rem .45rem;border-radius:9999px;background:#1a2250;color:#eef2ff;font-size:.75rem}
+    .badge.ok{background:rgba(34,197,94,.18);color:#86efac;border:1px solid rgba(34,197,94,.5)}
+    .badge.warn{background:rgba(255,107,107,.18);color:#fecaca;border:1px solid rgba(255,107,107,.5)}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <h1>CenevalMaster · EXANI II · Reading (25)</h1>
+    </div>
+  </header>
+
+  <main>
+    <!-- Pantalla de inicio -->
+    <section id="start" class="card">
+      <h2>Simulador de Comprensión Lectora (25 reactivos)</h2>
+      <p class="muted">5 lecturas; 5 preguntas por lectura; retroalimentación inmediata; registro con nombre y correo; envío a Google Sheet.</p>
+      <form id="form" class="grid">
+        <label><span>Nombre completo</span>
+          <input id="name" type="text" placeholder="Nombre y apellidos" required>
+        </label>
+        <label><span>Correo electrónico</span>
+          <input id="email" type="email" placeholder="tucorreo@dominio.com" required>
+        </label>
+        <label><span>Duración (minutos)</span>
+          <input id="mins" type="number" min="10" max="180" value="45">
+        </label>
+        <div style="display:flex;align-items:end;gap:.6rem">
+          <button class="primary" type="submit">Comenzar</button>
+        </div>
+      </form>
+      <div class="card" style="margin-top:1rem">
+        <div class="progress"><div id="progress-bar" style="width:0%"></div></div>
+        <p class="muted" style="margin:.4rem 0 0 0">El progreso aparecerá aquí durante el examen.</p>
+      </div>
+    </section>
+
+    <!-- Pantalla del examen -->
+    <section id="exam" class="hidden">
+      <div style="display:flex;gap:1rem;align-items:center;justify-content:space-between">
+        <div class="timer">⏳ <span id="left">--:--</span></div>
+        <div class="muted" id="who"></div>
+      </div>
+
+      <div id="passage-card" class="card">
+        <h3 id="passage-title"></h3>
+        <div id="passage" class="passage"></div>
+      </div>
+
+      <div id="question-card" class="card">
+        <div class="q-head">
+          <div><span id="qpos" class="badge"></span> <span id="topic" class="muted"></span></div>
+          <div id="status" class="badge">Sin responder</div>
+        </div>
+        <div id="qtext" class="q-text"></div>
+        <div id="options" class="options"></div>
+        <div id="fb" class="feedback hidden"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:.8rem">
+          <button id="prev" class="secondary">Anterior</button>
+          <button id="next" class="primary">Siguiente</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla de resultados -->
+    <section id="results" class="hidden">
+      <div class="card">
+        <h2>Resultados</h2>
+        <p id="score"></p>
+        <div id="breakdown" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem"></div>
+        <details open style="margin-top:.8rem">
+          <summary>Detalle por reactivo</summary>
+          <div id="review"></div>
+        </details>
+        <p id="send" class="muted" style="margin-top:.8rem"></p>
+        <div style="margin-top:.8rem">
+          <button id="again" class="secondary">Volver a empezar</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>© <span id="year"></span> CenevalMaster · Doc. Marco Polo Mendoza Martínez</small>
+  </footer>
+
+  <!-- CONFIG (URL ya embebida). Si usas otra Web App, reemplaza aquí. -->
+  <script>
+    window.CM_CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbznMrvO64Oq3ZqCB3LDJQrpOK1Uw7PschQTj4sgOtfh9ecYZvqIt-sr3CKmoGEyNxG7tg/exec',
+      SHEET_EXPECTED_HEADERS: ['timestamp','name','email','score','percent','time_used_sec','details_json','user_agent','commit_id']
+    };
+  </script>
+
+  <!-- PASAJES -->
+  <script>
+    const PASSAGES = [
+      {
+        id: 1,
+        title: "University Bike-Sharing Pilot",
+        text:
+`The university launched a six-month bike-sharing pilot to reduce traffic and improve students’ health. Two hundred smart bikes were placed near residence halls and academic buildings. Riders unlock them with a campus app and pay nothing for the first thirty minutes. After that, a small fee applies to encourage short trips and higher turnover. 
+
+Maintenance crews replace low batteries and fix punctures daily, while student volunteers collect usage feedback. Early data shows peaks between 8–9 a.m. and again at 4 p.m., which matches class schedules. Local businesses report more students stopping by for lunch, although some car park operators complain about lower demand. The sustainability office will decide whether to expand the program once the pilot ends, considering safety, cost, and equity across campuses.`
+      },
+      {
+        id: 2,
+        title: "Delivering Medicines by Drone",
+        text:
+`A remote clinic sits across a wide river that floods each rainy season. Traditionally, nurses relied on a ferry that ran irregularly, sometimes arriving after sunset. Last year, a nonprofit partnered with the regional government to test small drones for urgent deliveries. The aircraft can carry up to two kilograms of medicine and follow pre-approved routes above the river.
+
+Pharmacists prepare sealed boxes with temperature indicators, and each flight is tracked in real time. In the first three months, delivery times dropped from hours to under twenty minutes on average. Patients with diabetes benefited the most, since refrigerated insulin could arrive before it spoiled. However, the program had to pause twice due to storms and a temporary licensing review after a drone startled livestock.`
+      },
+      {
+        id: 3,
+        title: "Night at the Museum",
+        text:
+`To attract local visitors, the city museum created a monthly after-hours program. Instead of quiet galleries, guests find live jazz, short talks by curators, and pop-up workshops where families can handle replicas. Tickets include a drink and a map that links objects on display to nearby landmarks so people can continue exploring the city the next day.
+
+Attendance has doubled compared with regular Friday afternoons, partly because commuters can stop by on their way home. Critics argue that music distracts from the art, but the museum claims the events lower barriers for first-time visitors. The director hopes the initiative will turn occasional guests into members who support conservation projects year-round.`
+      },
+      {
+        id: 4,
+        title: "Seawater Micro-Desalination",
+        text:
+`A start-up has designed a suitcase-sized desalination unit for coastal villages. Unlike large plants that require extensive pipes and expensive membranes, the micro-system uses modular cartridges and runs on solar panels. A phone-sized controller monitors salinity and pressure, sending alerts if filters need rinsing. 
+
+In field tests, the device produced enough drinking water for a small clinic and a school kitchen. Costs remain the biggest challenge: while maintenance is low, replacing cartridges every few months can strain local budgets. The engineering team is negotiating with a foundation to subsidize parts in exchange for open data on performance and health outcomes.`
+      },
+      {
+        id: 5,
+        title: "Cutting Cafeteria Food Waste",
+        text:
+`A group of students built an app that predicts how many portions will be sold at each campus cafeteria. The model learns from schedules, weather, and past orders, then suggests daily batch sizes to cooks. When demand drops suddenly—during exam weeks—the app sends a notification recommending smaller trays and offering discounts near closing time.
+
+During a two-month pilot, cooks reported less stress and fewer leftovers. Donations to a local shelter rose because food was set aside earlier, before quality declined. Still, not everyone liked dynamic pricing: a few students said it felt unfair that their friend paid less for the same meal ten minutes later. The team plans a survey before expanding the app to all campuses.`
+      }
+    ];
+  </script>
+
+  <!-- PREGUNTAS (5 por lectura, 3 opciones, con explicación) -->
+  <script>
+    const QUESTIONS = [
+      // Passage 1
+      {id:1, pid:1, topic:"Main idea", q:"What is the main goal of the bike-sharing pilot?", options:["To generate profits for parking operators","To reduce traffic and support student well‑being","To replace all campus buses"], a:1, exp:"El texto afirma que busca reducir tráfico y mejorar la salud estudiantil."},
+      {id:2, pid:1, topic:"Detail", q:"How many bikes were introduced?", options:["200","300","100"], a:0, exp:"El primer párrafo indica: two hundred smart bikes."},
+      {id:3, pid:1, topic:"Inference", q:"Why are the first 30 minutes free?", options:["To encourage short trips and turnover","Because maintenance is funded by parking fees","Because bikes lack GPS"], a:0, exp:"Se menciona explícitamente que la tarifa posterior incentiva viajes cortos y mayor rotación."},
+      {id:4, pid:1, topic:"Vocabulary", q:"In context, “turnover” most nearly means…", options:["employee resignation","rate of usage or circulation","financial revenue"], a:1, exp:"‘Turnover’ aquí alude a rotación/uso de bicicletas, no a personal o finanzas."},
+      {id:5, pid:1, topic:"Purpose", q:"Why will the sustainability office review the pilot?", options:["To evaluate safety, cost, and equity","To remove bikes after complaints","To charge a higher fee"], a:0, exp:"Se evaluará seguridad, costo y equidad antes de decidir expansión."},
+
+      // Passage 2
+      {id:6, pid:2, topic:"Main idea", q:"What problem do drones address?", options:["Lack of pharmacists","Unreliable ferry access during floods","Shortage of pilots"], a:1, exp:"El ferry era irregular por las crecidas del río; los drones reducen tiempos."},
+      {id:7, pid:2, topic:"Detail", q:"What is the payload capacity?", options:["Up to 2 kg","Up to 5 kg","Up to 500 g"], a:0, exp:"Dice: can carry up to two kilograms of medicine."},
+      {id:8, pid:2, topic:"Inference", q:"Who benefited the most initially?", options:["Patients with diabetes","Infants with antibiotics","Surgeons"], a:0, exp:"Se menciona explícitamente a pacientes con diabetes por la insulina refrigerada."},
+      {id:9, pid:2, topic:"Vocabulary", q:"“Spoiled” in the passage is closest to…", options:["donated","contaminated","no longer usable/ruined"], a:2, exp:"‘Spoiled insulin’ = insulina echada a perder, ya no usable."},
+      {id:10, pid:2, topic:"Detail", q:"Why did the program pause twice?", options:["Budget cuts and staff turnover","Storms and a licensing review","Software bugs"], a:1, exp:"Se detuvo por tormentas y una revisión temporal de licencias."},
+
+      // Passage 3
+      {id:11, pid:3, topic:"Main idea", q:"What is the museum’s strategy?", options:["Lowering ticket prices permanently","Creating lively after‑hours events","Only offering virtual tours"], a:1, exp:"Programa nocturno con música, charlas y talleres."},
+      {id:12, pid:3, topic:"Detail", q:"What does the ticket include?", options:["A guided bus tour","A drink and a map","A free membership"], a:1, exp:"Incluye una bebida y un mapa especial."},
+      {id:13, pid:3, topic:"Inference", q:"Why has attendance doubled?", options:["Curators now work on weekends","Commuters can visit after work","The museum removed all entry fees"], a:1, exp:"Se sugiere que quienes vuelven del trabajo pueden pasar, aumentando asistencia."},
+      {id:14, pid:3, topic:"Attitude", q:"What criticism is mentioned?", options:["Lack of security at night","Music distracts from art","Workshops are too advanced"], a:1, exp:"Críticos dicen que la música distrae del arte."},
+      {id:15, pid:3, topic:"Purpose", q:"What long‑term goal does the director have?", options:["Turn guests into members","End daytime programs","Focus only on tourists"], a:0, exp:"Quiere convertir visitantes ocasionales en miembros que apoyen todo el año."},
+
+      // Passage 4
+      {id:16, pid:4, topic:"Main idea", q:"What is special about the desalination device?", options:["It is a large, centralized plant","It is portable and solar‑powered","It works only with river water"], a:1, exp:"Unidad tamaño maleta, modular, con paneles solares."},
+      {id:17, pid:4, topic:"Detail", q:"Which places did it support in tests?", options:["A clinic and a school kitchen","A factory and a hotel","An apartment complex"], a:0, exp:"Produjo suficiente agua para una clínica y la cocina de una escuela."},
+      {id:18, pid:4, topic:"Inference", q:"What is the main barrier to adoption?", options:["Complex training","High replacement cost of cartridges","No internet coverage"], a:1, exp:"El costo de sustituir cartuchos cada meses es el reto central."},
+      {id:19, pid:4, topic:"Vocabulary", q:"“Subsidize” most nearly means…", options:["prohibit","partly fund","tax heavily"], a:1, exp:"Subsidize = financiar parcialmente para abaratar."},
+      {id:20, pid:4, topic:"Purpose", q:"Why does the team want a partnership?", options:["To keep data private","To exchange open data for parts funding","To stop field tests"], a:1, exp:"Negocian partes subsidiadas a cambio de datos abiertos de desempeño."},
+
+      // Passage 5
+      {id:21, pid:5, topic:"Main idea", q:"What does the app try to reduce?", options:["Food waste in cafeterias","Queue waiting times","Tuition fees"], a:0, exp:"Busca reducir el desperdicio de comida."},
+      {id:22, pid:5, topic:"Detail", q:"What triggers smaller trays and discounts?", options:["Supplier issues","Sudden drops in demand","Overtime wages"], a:1, exp:"Ante caídas súbitas (exámenes), sugiere charolas pequeñas y descuentos."},
+      {id:23, pid:5, topic:"Inference", q:"Why did donations increase?", options:["Meals were set aside earlier while still fresh","Students bought extra meals to donate","Shelter expanded storage"], a:0, exp:"Separan donaciones antes, cuando la calidad aún es buena."},
+      {id:24, pid:5, topic:"Attitude", q:"What concern did some students express?", options:["App drains battery","Dynamic pricing feels unfair","Longer lines at cashier"], a:1, exp:"Algunos lo consideran injusto que otro pague menos minutos después."},
+      {id:25, pid:5, topic:"Purpose", q:"What will the team do before expanding?", options:["Shut down discounts","Run a survey","Hire cooks"], a:1, exp:"Planean una encuesta antes de ampliar el sistema."}
+    ];
+  </script>
+
+  <!-- LÓGICA: flujo, retro inmediata, envío al Sheet -->
+  <script>
+    (() => {
+      const APPS_SCRIPT_URL = (window.CM_CONFIG && window.CM_CONFIG.APPS_SCRIPT_URL) || '';
+      const $ = s => document.querySelector(s);
+      const start = $('#start'), exam = $('#exam'), results = $('#results');
+      const f = $('#form'), nameI = $('#name'), mailI = $('#email'), minsI = $('#mins');
+      const who = $('#who'), leftEl = $('#left'), pb = $('#progress-bar');
+      const pTitle = $('#passage-title'), pText = $('#passage');
+      const qpos = $('#qpos'), topic = $('#topic'), qtext = $('#qtext'), opts = $('#options'), fb = $('#fb');
+      const prevB = $('#prev'), nextB = $('#next'), statusB = $('#status');
+      const scoreEl = $('#score'), breakdown = $('#breakdown'), review = $('#review'), send = $('#send');
+      const again = $('#again'); $('#year').textContent = new Date().getFullYear();
+
+      let order = [];      // índice de preguntas 0..24
+      let cur = 0;         // posición actual
+      let ans = [];        // respuestas elegidas
+      let correct = [];    // booleanos
+      let startedAt = 0;   // ms
+      let totalSec = 45*60, tmr = null;
+
+      function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+      function startTimer(){
+        const end = Date.now() + totalSec*1000;
+        function tick(){
+          const r = Math.max(0, Math.floor((end - Date.now())/1000));
+          leftEl.textContent = `${String(Math.floor(r/60)).padStart(2,'0')}:${String(r%60).padStart(2,'0')}`;
+          pb.style.width = `${100*(1-(r/totalSec))}%`;
+          if(r<=0){ clearInterval(tmr); finalize(true); }
+        }
+        tick(); tmr = setInterval(tick,1000);
+      }
+
+      function loadPassage(pid){
+        const p = PASSAGES.find(x=>x.id===pid);
+        pTitle.textContent = p.title;
+        pText.textContent = p.text;
+      }
+
+      function render(){
+        const qi = order[cur];
+        const item = QUESTIONS[qi];
+        // Si es la primera pregunta de una lectura, carga pasaje
+        const prevPid = cur>0 ? QUESTIONS[order[cur-1]].pid : null;
+        if(prevPid !== item.pid) loadPassage(item.pid);
+
+        qpos.textContent = `Item ${cur+1} / ${order.length}`;
+        topic.textContent = item.topic;
+        qtext.textContent = item.q;
+        statusB.textContent = ans[qi]==null ? 'Sin responder' : (correct[qi] ? 'Correcto' : 'Incorrecto');
+        statusB.className = 'badge ' + (ans[qi]==null ? '' : (correct[qi] ? 'ok' : 'warn'));
+
+        opts.innerHTML = ''; fb.classList.add('hidden'); fb.classList.remove('ok','err'); fb.textContent='';
+        item.options.forEach((op,idx)=>{
+          const L = document.createElement('label'); L.className='option';
+          L.innerHTML = `<input type="radio" name="q${item.id}" value="${idx}" ${ans[qi]===idx?'checked':''}> <span>${op}</span>`;
+          L.addEventListener('change',()=>{
+            // Retroalimentación inmediata
+            ans[qi] = idx;
+            const ok = (idx===item.a);
+            correct[qi] = ok;
+            statusB.textContent = ok ? 'Correcto' : 'Incorrecto';
+            statusB.className = 'badge ' + (ok?'ok':'warn');
+            fb.textContent = (ok? '✔ ' : '✖ ') + item.exp;
+            fb.classList.remove('hidden'); fb.classList.toggle('ok',ok); fb.classList.toggle('err',!ok);
+            // Deshabilitar opciones tras responder
+            [...opts.querySelectorAll('input')].forEach(r=>r.disabled=true);
+          });
+          opts.appendChild(L);
+        });
+
+        prevB.disabled = (cur===0);
+        nextB.textContent = (cur===order.length-1) ? 'Finalizar' : 'Siguiente';
+      }
+
+      function finalize(auto=false){
+        clearInterval(tmr);
+        exam.classList.add('hidden'); results.classList.remove('hidden');
+
+        const elapsed = Math.max(0, Math.floor((Date.now()-startedAt)/1000));
+        const nOK = correct.filter(Boolean).length;
+        const pct = Math.round(100*nOK/order.length);
+        scoreEl.innerHTML = `Tu puntaje: <span class="badge ${
