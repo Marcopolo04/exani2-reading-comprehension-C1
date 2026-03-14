@@ -55,9 +55,9 @@
     <section id="start" class="card">
       <h2>Simulador de Comprensión Lectora (25 reactivos)</h2>
       <p class="muted">5 lecturas; 5 preguntas por lectura; retroalimentación inmediata; registro con nombre y correo; envío a Google Sheet.</p>
-      <form id="form" class="grid">
+      <form id="form" class="grid" novalidate>
         <label><span>Nombre completo</span>
-          <input id="name" type="text" placeholder="Nombre y apellidos" required>
+          <input id="name" type="text" placeholder="Nombre y apellidos" required minlength="5">
         </label>
         <label><span>Correo electrónico</span>
           <input id="email" type="email" placeholder="tucorreo@dominio.com" required>
@@ -124,22 +124,22 @@
     <small>© <span id="year"></span> CenevalMaster · Doc. Marco Polo Mendoza Martínez</small>
   </footer>
 
-  <!-- CONFIG (URL ya embebida). Si usas otra Web App, reemplaza aquí. -->
+  <!-- CONFIG: tu Web App URL (ya embebida). Si la cambias al redeploy, actualiza aquí. -->
   <script>
     window.CM_CONFIG = {
-      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwKT1modPbia9hDqstdjXXYQreVqe_i_L1eKDA8M2HyXewtOu1AuUqiG3RL2tBpQ4FH/exec',
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyUN7YQWephTijr6mDPXirq4LhLrZuTJtBBkqA35qx8HBOzp2daCSTCP1XAmvvtUqo/exec',
       SHEET_EXPECTED_HEADERS: ['timestamp','name','email','score','percent','time_used_sec','details_json','user_agent','commit_id']
     };
   </script>
 
   <!-- PASAJES -->
   <script>
-    const PASSAGES = [
+    window.PASSAGES = [
       {
         id: 1,
         title: "University Bike-Sharing Pilot",
         text:
-`The university launched a six-month bike-sharing pilot to reduce traffic and improve students’ health. Two hundred smart bikes were placed near residence halls and academic buildings. Riders unlock them with a campus app and pay nothing for the first thirty minutes. After that, a small fee applies to encourage short trips and higher turnover. 
+`The university launched a six-month bike-sharing pilot to reduce traffic and improve students’ health. Two hundred smart bikes were placed near residence halls and academic buildings. Riders unlock them with a campus app and pay nothing for the first thirty minutes. After that, a small fee applies to encourage short trips and higher turnover.
 
 Maintenance crews replace low batteries and fix punctures daily, while student volunteers collect usage feedback. Early data shows peaks between 8–9 a.m. and again at 4 p.m., which matches class schedules. Local businesses report more students stopping by for lunch, although some car park operators complain about lower demand. The sustainability office will decide whether to expand the program once the pilot ends, considering safety, cost, and equity across campuses.`
       },
@@ -163,7 +163,7 @@ Attendance has doubled compared with regular Friday afternoons, partly because c
         id: 4,
         title: "Seawater Micro-Desalination",
         text:
-`A start-up has designed a suitcase-sized desalination unit for coastal villages. Unlike large plants that require extensive pipes and expensive membranes, the micro-system uses modular cartridges and runs on solar panels. A phone-sized controller monitors salinity and pressure, sending alerts if filters need rinsing. 
+`A start-up has designed a suitcase-sized desalination unit for coastal villages. Unlike large plants that require extensive pipes and expensive membranes, the micro-system uses modular cartridges and runs on solar panels. A phone-sized controller monitors salinity and pressure, sending alerts if filters need rinsing.
 
 In field tests, the device produced enough drinking water for a small clinic and a school kitchen. Costs remain the biggest challenge: while maintenance is low, replacing cartridges every few months can strain local budgets. The engineering team is negotiating with a foundation to subsidize parts in exchange for open data on performance and health outcomes.`
       },
@@ -180,124 +180,30 @@ During a two-month pilot, cooks reported less stress and fewer leftovers. Donati
 
   <!-- PREGUNTAS (5 por lectura, 3 opciones, con explicación) -->
   <script>
-    const QUESTIONS = [
+    window.QUESTIONS = [
       // Passage 1
       {id:1, pid:1, topic:"Main idea", q:"What is the main goal of the bike-sharing pilot?", options:["To generate profits for parking operators","To reduce traffic and support student well‑being","To replace all campus buses"], a:1, exp:"El texto afirma que busca reducir tráfico y mejorar la salud estudiantil."},
       {id:2, pid:1, topic:"Detail", q:"How many bikes were introduced?", options:["200","300","100"], a:0, exp:"El primer párrafo indica: two hundred smart bikes."},
-      {id:3, pid:1, topic:"Inference", q:"Why are the first 30 minutes free?", options:["To encourage short trips and turnover","Because maintenance is funded by parking fees","Because bikes lack GPS"], a:0, exp:"Se menciona explícitamente que la tarifa posterior incentiva viajes cortos y mayor rotación."},
-      {id:4, pid:1, topic:"Vocabulary", q:"In context, “turnover” most nearly means…", options:["employee resignation","rate of usage or circulation","financial revenue"], a:1, exp:"‘Turnover’ aquí alude a rotación/uso de bicicletas, no a personal o finanzas."},
+      {id:3, pid:1, topic:"Inference", q:"Why are the first 30 minutes free?", options:["To encourage short trips and turnover","Because maintenance is funded by parking fees","Because bikes lack GPS"], a:0, exp:"Se menciona que la tarifa posterior incentiva viajes cortos y mayor rotación."},
+      {id:4, pid:1, topic:"Vocabulary", q:"In context, “turnover” most nearly means…", options:["employee resignation","rate of usage or circulation","financial revenue"], a:1, exp:"‘Turnover’ aquí alude a rotación/uso de bicicletas."},
       {id:5, pid:1, topic:"Purpose", q:"Why will the sustainability office review the pilot?", options:["To evaluate safety, cost, and equity","To remove bikes after complaints","To charge a higher fee"], a:0, exp:"Se evaluará seguridad, costo y equidad antes de decidir expansión."},
 
       // Passage 2
-      {id:6, pid:2, topic:"Main idea", q:"What problem do drones address?", options:["Lack of pharmacists","Unreliable ferry access during floods","Shortage of pilots"], a:1, exp:"El ferry era irregular por las crecidas del río; los drones reducen tiempos."},
+      {id:6, pid:2, topic:"Main idea", q:"What problem do drones address?", options:["Lack of pharmacists","Unreliable ferry access during floods","Shortage of pilots"], a:1, exp:"El ferry era irregular por las crecidas; los drones reducen tiempos."},
       {id:7, pid:2, topic:"Detail", q:"What is the payload capacity?", options:["Up to 2 kg","Up to 5 kg","Up to 500 g"], a:0, exp:"Dice: can carry up to two kilograms of medicine."},
-      {id:8, pid:2, topic:"Inference", q:"Who benefited the most initially?", options:["Patients with diabetes","Infants with antibiotics","Surgeons"], a:0, exp:"Se menciona explícitamente a pacientes con diabetes por la insulina refrigerada."},
-      {id:9, pid:2, topic:"Vocabulary", q:"“Spoiled” in the passage is closest to…", options:["donated","contaminated","no longer usable/ruined"], a:2, exp:"‘Spoiled insulin’ = insulina echada a perder, ya no usable."},
+      {id:8, pid:2, topic:"Inference", q:"Who benefited the most initially?", options:["Patients with diabetes","Infants with antibiotics","Surgeons"], a:0, exp:"Se menciona a pacientes con diabetes por la insulina refrigerada."},
+      {id:9, pid:2, topic:"Vocabulary", q:"“Spoiled” in the passage is closest to…", options:["donated","contaminated","no longer usable/ruined"], a:2, exp:"‘Spoiled insulin’ = insulina echada a perder."},
       {id:10, pid:2, topic:"Detail", q:"Why did the program pause twice?", options:["Budget cuts and staff turnover","Storms and a licensing review","Software bugs"], a:1, exp:"Se detuvo por tormentas y una revisión temporal de licencias."},
 
       // Passage 3
       {id:11, pid:3, topic:"Main idea", q:"What is the museum’s strategy?", options:["Lowering ticket prices permanently","Creating lively after‑hours events","Only offering virtual tours"], a:1, exp:"Programa nocturno con música, charlas y talleres."},
       {id:12, pid:3, topic:"Detail", q:"What does the ticket include?", options:["A guided bus tour","A drink and a map","A free membership"], a:1, exp:"Incluye una bebida y un mapa especial."},
-      {id:13, pid:3, topic:"Inference", q:"Why has attendance doubled?", options:["Curators now work on weekends","Commuters can visit after work","The museum removed all entry fees"], a:1, exp:"Se sugiere que quienes vuelven del trabajo pueden pasar, aumentando asistencia."},
+      {id:13, pid:3, topic:"Inference", q:"Why has attendance doubled?", options:["Curators now work on weekends","Commuters can visit after work","The museum removed all entry fees"], a:1, exp:"Quienes vuelven del trabajo pueden pasar, aumentando asistencia."},
       {id:14, pid:3, topic:"Attitude", q:"What criticism is mentioned?", options:["Lack of security at night","Music distracts from art","Workshops are too advanced"], a:1, exp:"Críticos dicen que la música distrae del arte."},
-      {id:15, pid:3, topic:"Purpose", q:"What long‑term goal does the director have?", options:["Turn guests into members","End daytime programs","Focus only on tourists"], a:0, exp:"Quiere convertir visitantes ocasionales en miembros que apoyen todo el año."},
+      {id:15, pid:3, topic:"Purpose", q:"What long‑term goal does the director have?", options:["Turn guests into members","End daytime programs","Focus only on tourists"], a:0, exp:"Convertir visitantes en miembros que apoyen todo el año."},
 
       // Passage 4
       {id:16, pid:4, topic:"Main idea", q:"What is special about the desalination device?", options:["It is a large, centralized plant","It is portable and solar‑powered","It works only with river water"], a:1, exp:"Unidad tamaño maleta, modular, con paneles solares."},
-      {id:17, pid:4, topic:"Detail", q:"Which places did it support in tests?", options:["A clinic and a school kitchen","A factory and a hotel","An apartment complex"], a:0, exp:"Produjo suficiente agua para una clínica y la cocina de una escuela."},
-      {id:18, pid:4, topic:"Inference", q:"What is the main barrier to adoption?", options:["Complex training","High replacement cost of cartridges","No internet coverage"], a:1, exp:"El costo de sustituir cartuchos cada meses es el reto central."},
-      {id:19, pid:4, topic:"Vocabulary", q:"“Subsidize” most nearly means…", options:["prohibit","partly fund","tax heavily"], a:1, exp:"Subsidize = financiar parcialmente para abaratar."},
-      {id:20, pid:4, topic:"Purpose", q:"Why does the team want a partnership?", options:["To keep data private","To exchange open data for parts funding","To stop field tests"], a:1, exp:"Negocian partes subsidiadas a cambio de datos abiertos de desempeño."},
-
-      // Passage 5
-      {id:21, pid:5, topic:"Main idea", q:"What does the app try to reduce?", options:["Food waste in cafeterias","Queue waiting times","Tuition fees"], a:0, exp:"Busca reducir el desperdicio de comida."},
-      {id:22, pid:5, topic:"Detail", q:"What triggers smaller trays and discounts?", options:["Supplier issues","Sudden drops in demand","Overtime wages"], a:1, exp:"Ante caídas súbitas (exámenes), sugiere charolas pequeñas y descuentos."},
-      {id:23, pid:5, topic:"Inference", q:"Why did donations increase?", options:["Meals were set aside earlier while still fresh","Students bought extra meals to donate","Shelter expanded storage"], a:0, exp:"Separan donaciones antes, cuando la calidad aún es buena."},
-      {id:24, pid:5, topic:"Attitude", q:"What concern did some students express?", options:["App drains battery","Dynamic pricing feels unfair","Longer lines at cashier"], a:1, exp:"Algunos lo consideran injusto que otro pague menos minutos después."},
-      {id:25, pid:5, topic:"Purpose", q:"What will the team do before expanding?", options:["Shut down discounts","Run a survey","Hire cooks"], a:1, exp:"Planean una encuesta antes de ampliar el sistema."}
-    ];
-  </script>
-
-  <!-- LÓGICA: flujo, retro inmediata, envío al Sheet -->
-  <script>
-    (() => {
-      const APPS_SCRIPT_URL = (window.CM_CONFIG && window.CM_CONFIG.APPS_SCRIPT_URL) || '';
-      const $ = s => document.querySelector(s);
-      const start = $('#start'), exam = $('#exam'), results = $('#results');
-      const f = $('#form'), nameI = $('#name'), mailI = $('#email'), minsI = $('#mins');
-      const who = $('#who'), leftEl = $('#left'), pb = $('#progress-bar');
-      const pTitle = $('#passage-title'), pText = $('#passage');
-      const qpos = $('#qpos'), topic = $('#topic'), qtext = $('#qtext'), opts = $('#options'), fb = $('#fb');
-      const prevB = $('#prev'), nextB = $('#next'), statusB = $('#status');
-      const scoreEl = $('#score'), breakdown = $('#breakdown'), review = $('#review'), send = $('#send');
-      const again = $('#again'); $('#year').textContent = new Date().getFullYear();
-
-      let order = [];      // índice de preguntas 0..24
-      let cur = 0;         // posición actual
-      let ans = [];        // respuestas elegidas
-      let correct = [];    // booleanos
-      let startedAt = 0;   // ms
-      let totalSec = 45*60, tmr = null;
-
-      function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-      function startTimer(){
-        const end = Date.now() + totalSec*1000;
-        function tick(){
-          const r = Math.max(0, Math.floor((end - Date.now())/1000));
-          leftEl.textContent = `${String(Math.floor(r/60)).padStart(2,'0')}:${String(r%60).padStart(2,'0')}`;
-          pb.style.width = `${100*(1-(r/totalSec))}%`;
-          if(r<=0){ clearInterval(tmr); finalize(true); }
-        }
-        tick(); tmr = setInterval(tick,1000);
-      }
-
-      function loadPassage(pid){
-        const p = PASSAGES.find(x=>x.id===pid);
-        pTitle.textContent = p.title;
-        pText.textContent = p.text;
-      }
-
-      function render(){
-        const qi = order[cur];
-        const item = QUESTIONS[qi];
-        // Si es la primera pregunta de una lectura, carga pasaje
-        const prevPid = cur>0 ? QUESTIONS[order[cur-1]].pid : null;
-        if(prevPid !== item.pid) loadPassage(item.pid);
-
-        qpos.textContent = `Item ${cur+1} / ${order.length}`;
-        topic.textContent = item.topic;
-        qtext.textContent = item.q;
-        statusB.textContent = ans[qi]==null ? 'Sin responder' : (correct[qi] ? 'Correcto' : 'Incorrecto');
-        statusB.className = 'badge ' + (ans[qi]==null ? '' : (correct[qi] ? 'ok' : 'warn'));
-
-        opts.innerHTML = ''; fb.classList.add('hidden'); fb.classList.remove('ok','err'); fb.textContent='';
-        item.options.forEach((op,idx)=>{
-          const L = document.createElement('label'); L.className='option';
-          L.innerHTML = `<input type="radio" name="q${item.id}" value="${idx}" ${ans[qi]===idx?'checked':''}> <span>${op}</span>`;
-          L.addEventListener('change',()=>{
-            // Retroalimentación inmediata
-            ans[qi] = idx;
-            const ok = (idx===item.a);
-            correct[qi] = ok;
-            statusB.textContent = ok ? 'Correcto' : 'Incorrecto';
-            statusB.className = 'badge ' + (ok?'ok':'warn');
-            fb.textContent = (ok? '✔ ' : '✖ ') + item.exp;
-            fb.classList.remove('hidden'); fb.classList.toggle('ok',ok); fb.classList.toggle('err',!ok);
-            // Deshabilitar opciones tras responder
-            [...opts.querySelectorAll('input')].forEach(r=>r.disabled=true);
-          });
-          opts.appendChild(L);
-        });
-
-        prevB.disabled = (cur===0);
-        nextB.textContent = (cur===order.length-1) ? 'Finalizar' : 'Siguiente';
-      }
-
-      function finalize(auto=false){
-        clearInterval(tmr);
-        exam.classList.add('hidden'); results.classList.remove('hidden');
-
-        const elapsed = Math.max(0, Math.floor((Date.now()-startedAt)/1000));
-        const nOK = correct.filter(Boolean).length;
-        const pct = Math.round(100*nOK/order.length);
-        scoreEl.innerHTML = `Tu puntaje: <span class="badge ${
+      {id:17, pid:4, topic:"Detail", q:"Which places did it support in tests?", options:["A clinic and a school kitchen","A factory and a hotel","An apartment complex"], a:0, exp:"Produjo suficiente agua para clínica y cocina escolar."},
+      {id:18, pid:4, topic:"Inference", q:"What is the main barrier to adoption?", options:["Complex training","High replacement cost of cartridges","No internet coverage"], a:1, exp:"Costo de reemplazo de cartuchos es el reto central."},
+      {id:19, pid:4, topic:"Vocabulary", q:"“Subsidize” most nearly means…", options:["prohibit","partly fund","tax heavily"], a:1, exp:"Sub
